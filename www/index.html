@@ -6,9 +6,28 @@
     <title>Cloud Resource Monitor</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <style>
+        .fade-enter-active, .fade-leave-active {
+            background-color: none;
+            transition: all 4s;
+        }
+        
+        .fade-enter, .fade-leave-to {
+            background-color: #ffff99;
+        }
+
+        body {
+            margin: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
     <div id="app" class="container">
+        <h1>Cloud Resource Monitor</h1>
         <table class="table">
             <thead>
                 <th scope="col">Event</th>
@@ -19,10 +38,10 @@
                 <th scope="col">Username</th>
                 <th scope="col">Timestamp</th>
             </thead>
-            <tbody>
-                <tr v-for="resource in resources">
+            <tbody name="fade" is="transition-group">
+                <tr v-for="resource in resources" v-bind:key="resource">
                     <td>{{ resource.eventType | shortResourceType }}</td>
-                    <td>{{ resource.kind }}</td>
+                    <td>{{ resource.resourceProvider }}</td>
                     <td>{{ resource.resourceGroupName }}</td>
                     <td>{{ resource.resourceName }}</td>
                     <td>{{ resource.location }}</td>
@@ -62,10 +81,21 @@
         
         connection.on('newResourceEvent', function (resource) {
             console.log(resource)
-            data.resources.push(resource)
+            data.resources.unshift(processResource(resource))
         })
 
         connection.start()
+
+
+        function processResource(resource) {
+            if (!resource.resourceGroupName) {
+                resource.resourceGroupName = /\/resourcegroups\/([^/]+)/i.exec(resource.resourceId)[1]
+            }
+            if (!resource.resourceName) {
+                resource.resourceName = /\/([^/]+)$/.exec(resource.resourceId)[1]
+            }
+            return resource
+        }
     </script>
 </body>
 </html>
