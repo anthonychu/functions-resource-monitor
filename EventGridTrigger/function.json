@@ -1,0 +1,15 @@
+{
+  "bindings": [
+    {
+      "type": "eventGridTrigger",
+      "name": "eventGridEvent",
+      "direction": "in"
+    },
+    {
+      "type": "signalR",
+      "direction": "out",
+      "name": "SignalRMessages",
+      "hubName": "resources"
+    }
+  ]
+}

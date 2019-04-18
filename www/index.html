@@ -1,0 +1,71 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Cloud Resource Monitor</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+    <div id="app" class="container">
+        <table class="table">
+            <thead>
+                <th scope="col">Event</th>
+                <th scope="col">Type</th>
+                <th scope="col">Resource Group</th>
+                <th scope="col">Resource</th>
+                <th scope="col">Location</th>
+                <th scope="col">Username</th>
+                <th scope="col">Timestamp</th>
+            </thead>
+            <tbody>
+                <tr v-for="resource in resources">
+                    <td>{{ resource.eventType | shortResourceType }}</td>
+                    <td>{{ resource.kind }}</td>
+                    <td>{{ resource.resourceGroupName }}</td>
+                    <td>{{ resource.resourceName }}</td>
+                    <td>{{ resource.location }}</td>
+                    <td>{{ resource.username }}</td>
+                    <td>{{ resource.timestamp }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@aspnet/signalr@1.1.4/dist/browser/signalr.min.js"></script>
+    <script>
+        var data = {
+            resources: []
+        }
+
+        var app = new Vue({
+            el: '#app',
+            data: data,
+            filters: {
+                shortResourceType: function (resourceType) {
+                    if (resourceType === 'Microsoft.Resources.ResourceWriteSuccess') {
+                        return 'Create/Update'
+                    } else if (resourceType === 'Microsoft.Resources.ResourceDeleteSuccess') {
+                        return 'Delete'
+                    } else {
+                        return resourceType
+                    }
+                }
+            }
+        })
+
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl('http://localhost:7071/api')
+            .build()
+        
+        connection.on('newResourceEvent', function (resource) {
+            console.log(resource)
+            data.resources.push(resource)
+        })
+
+        connection.start()
+    </script>
+</body>
+</html>
