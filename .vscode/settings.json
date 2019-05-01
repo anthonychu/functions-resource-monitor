@@ -7,6 +7,5 @@
     "obj": true,
     "bin": true
   },
-  "debug.internalConsoleOptions": "neverOpen",
-  "azureFunctions.templateFilter": "All"
+  "debug.internalConsoleOptions": "neverOpen"
 }
